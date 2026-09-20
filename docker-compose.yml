@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # ── PHP / Apache Web Server ──
+  app:
+    build: .
+    container_name: fitness_app
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=fitness_tracker1
+      - DB_USER=fitness_user
+      - DB_PASS=fitness_secret
+
+  # ── MySQL Database ──
+  db:
+    image: mysql:8.0
+    container_name: fitness_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root_secret
+      MYSQL_DATABASE: fitness_tracker1
+      MYSQL_USER: fitness_user
+      MYSQL_PASSWORD: fitness_secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+
+  # ── phpMyAdmin (Visual Database Manager) ──
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: fitness_phpmyadmin
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_USER: fitness_user
+      PMA_PASSWORD: fitness_secret
+
+volumes:
+  db_data:
