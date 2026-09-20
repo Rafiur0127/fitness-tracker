@@ -51,6 +51,7 @@ fitness_tracker/
 - PHP 8.1+
 - MySQL 8+
 - A local server (XAMPP, Laragon, or PHP built-in server)
+- Docker Desktop with Docker Compose (recommended)
 
 ### Installation
 
@@ -71,6 +72,29 @@ php -S localhost:8000 -t public/
 ```
 
 Then visit `http://localhost:8000/login.php`.
+
+### Run with Docker Compose
+
+Docker Compose starts Apache/PHP, MySQL, and phpMyAdmin with the correct
+service-to-service database host:
+
+```bash
+docker compose up --build
+```
+
+- Application: `http://localhost:8080/login.php`
+- phpMyAdmin: `http://localhost:8081`
+
+The database is persisted in the `db_data` volume. To recreate it from
+`database/schema.sql`, run `docker compose down --volumes` before starting the
+stack again.
+
+### CI/CD
+
+The [local_CICD.yml](.github/workflows/local_CICD.yml) workflow runs on pushes
+and pull requests. It validates the Compose file, builds the application image,
+lint-checks every PHP file, starts the complete stack, and smoke-tests the login
+page.
 
 ---
 

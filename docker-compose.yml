@@ -1,7 +1,4 @@
-version: '3.8'
-
 services:
-  # ── PHP / Apache Web Server ──
   app:
     build: .
     container_name: fitness_app
@@ -10,14 +7,14 @@ services:
     volumes:
       - .:/var/www/html
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       - DB_HOST=db
       - DB_NAME=fitness_tracker1
       - DB_USER=fitness_user
       - DB_PASS=fitness_secret
 
-  # ── MySQL Database ──
   db:
     image: mysql:8.0
     container_name: fitness_db
@@ -31,8 +28,12 @@ services:
     volumes:
       - db_data:/var/lib/mysql
       - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
-  # ── phpMyAdmin (Visual Database Manager) ──
   phpmyadmin:
     image: phpmyadmin:latest
     container_name: fitness_phpmyadmin

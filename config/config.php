@@ -13,10 +13,10 @@ if (file_exists($env_file)) {
     }
 }
 
-$db_host = $_ENV['DB_HOST'] ?? 'localhost';
-$db_name = $_ENV['DB_NAME'] ?? 'fitness_tracker1';
-$db_user = $_ENV['DB_USER'] ?? 'root';
-$db_pass = $_ENV['DB_PASS'] ?? '';
+$db_host = $_ENV['DB_HOST'] ?? getenv('DB_HOST') ?: 'localhost';
+$db_name = $_ENV['DB_NAME'] ?? getenv('DB_NAME') ?: 'fitness_tracker1';
+$db_user = $_ENV['DB_USER'] ?? getenv('DB_USER') ?: 'root';
+$db_pass = $_ENV['DB_PASS'] ?? getenv('DB_PASS') ?: '';
 
 try {
     $pdo = new PDO(
