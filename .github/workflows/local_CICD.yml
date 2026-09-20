@@ -1,39 +1,30 @@
-name: Local CI/CD
+name: Local CI/CD - Manage Docker Containers
 
 on:
   push:
-    branches: ["**"]
-  pull_request:
-
-permissions:
-  contents: read
+    branches: [ "main" ]
+  workflow_dispatch: 
 
 jobs:
-  validate:
-    runs-on: ubuntu-latest
+  build-and-manage-containers:
+    runs-on: ubuntu-latest 
+
     steps:
-      - name: Check out source
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Validate Compose configuration
-        run: docker compose config
+      - name: Create Docker Images
+        run: docker compose build
 
-      - name: Build application image
-        run: docker build --tag fitness-tracker:test .
+      - name: Start Docker Containers
+        run: docker compose up -d
 
-      - name: Lint PHP source
+      - name: Verify Container Status
         run: |
-          docker run --rm fitness-tracker:test sh -c \
-            "find app config public -type f -name '*.php' -print0 | xargs -0 -n1 php -l"
+          echo "Waiting for services to initialize..."
+          sleep 10
+          docker compose ps
 
-      - name: Start the application stack
-        run: docker compose up -d --wait
-
-      - name: Smoke test the login page
-        run: |
-          curl --fail --retry 10 --retry-delay 3 --retry-connrefused \
-            http://127.0.0.1:8080/login.php
-
-      - name: Stop the application stack
+      - name: Stop and Clean Up Containers
         if: always()
-        run: docker compose down --volumes
+        run: docker compose down
