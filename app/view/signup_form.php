@@ -31,7 +31,6 @@
   <input type="password" name="password" placeholder="Password (8+ chars, upper & lower & number)" required>
   <input type="password" name="confirm"  placeholder="Confirm Password" required>
   <input type="number" name="age"      placeholder="Age"    min="18"  required>
-  <input type="number" name="weight"   placeholder="Weight (kg)" step="0.1" min="1" required>
   <select name="gender" required>
     <option value="">Select Gender</option>
     <option value="Male">Male</option>

@@ -11,10 +11,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $password = $_POST["password"]    ?? '';
     $confirm  = $_POST["confirm"]     ?? '';
     $age      = intval($_POST["age"]  ?? 0);
-    $weight   = floatval($_POST["weight"] ?? 0);
     $gender   = $_POST["gender"]      ?? '';
 
-    if (!$name || !$email || !$password || !$confirm || !$age || !$weight || !$gender) {
+    if (!$name || !$email || !$password || !$confirm || !$age || !$gender) {
         $errors[] = "All fields are required.";
     }
 
@@ -40,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     if (empty($errors)) {
-        if (register_user($pdo, $name, $email, $password, $age, $weight, $gender)) {
+        if (register_user($pdo, $name, $email, $password, $age, $gender)) {
             header("Location: login.php?registered=1");
             exit;
         } else {

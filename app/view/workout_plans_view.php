@@ -102,7 +102,7 @@
   <form method="POST">
     <input type="hidden" name="create_plan" value="1">
     <input type="text" name="name" placeholder="Plan Name" required>
-    <input type="number" name="weeks" placeholder="Duration in weeks" min="1" required>
+    <input type="number" name="weeks" placeholder="Duration in weeks" min="4" max="12" required>
     <textarea name="description" placeholder="Short Description"></textarea>
     <button type="submit">Create Plan</button>
   </form>

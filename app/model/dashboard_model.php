@@ -1,18 +1,18 @@
 <?php
 
 function get_user_name($pdo, $user_id) {
-  $stmt = $pdo->prepare("SELECT name FROM users WHERE id = ?");
+  $stmt = $pdo->prepare("SELECT CONCAT_WS(' ', first_name, last_name) AS name FROM users WHERE id = ?");
   $stmt->execute([$user_id]);
   $row = $stmt->fetch(PDO::FETCH_ASSOC);
   return $row ? $row["name"] : "User";
 }
 
 function get_lifetime_stats($pdo, $user_id) {
-  $stmt = $pdo->prepare("SELECT COUNT(*) AS workout_count, SUM(duration) AS workout_minutes FROM workout_sessions WHERE user_id = ?");
+  $stmt = $pdo->prepare("SELECT COUNT(*) AS workout_count, COALESCE(SUM(duration), 0) AS workout_minutes FROM workout_sessions WHERE user_id = ?");
   $stmt->execute([$user_id]);
   $workout = $stmt->fetch();
 
-  $stmt = $pdo->prepare("SELECT SUM(amount_ml) AS water_ml FROM water_tracker WHERE user_id = ?");
+  $stmt = $pdo->prepare("SELECT COALESCE(SUM(amount_ml), 0) AS water_ml FROM water_logs WHERE user_id = ?");
   $stmt->execute([$user_id]);
   $water = $stmt->fetch();
 
@@ -40,7 +40,7 @@ function get_user_achievements_from_totals($stats) {
 function get_weekly_workout_minutes($pdo, $user_id, $weekOffset = 0) {
   $stmt = $pdo->prepare("
     SELECT DATE_FORMAT(date, '%a') AS day, type, SUM(duration) AS total
-    FROM workout_sessions 
+    FROM workout_sessions
     WHERE user_id = ? AND WEEK(date) = WEEK(CURDATE()) - ?
     GROUP BY day, type
   ");
@@ -56,7 +56,7 @@ function get_weekly_workout_minutes($pdo, $user_id, $weekOffset = 0) {
     $day = $row['day'];
     $type = strtolower($row['type']);
     if (isset($data[$day][$type])) {
-      $data[$day][$type] = (int)$row['total'];
+      $data[$day][$type] = (int) $row['total'];
     }
   }
 
@@ -80,7 +80,9 @@ function get_monthly_workout_trends($pdo, $user_id) {
     if (!isset($weeks[$week])) {
       $weeks[$week] = ["strength" => 0, "cardio" => 0];
     }
-    $weeks[$week][$type] = (int)$row["total"];
+    if (isset($weeks[$week][$type])) {
+      $weeks[$week][$type] = (int) $row["total"];
+    }
   }
 
   return $weeks;

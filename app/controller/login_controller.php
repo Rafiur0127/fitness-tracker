@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         if ($user && password_verify($password, $user["password"])) {
             session_regenerate_id(true);   // prevent session fixation
             $_SESSION["user_id"]   = $user["id"];
-            $_SESSION["user_name"] = $user["name"];
+            $_SESSION["user_name"] = trim(($user["first_name"] ?? '') . ' ' . ($user["last_name"] ?? ''));
             header("Location: dashboard.php");
             exit;
         } else {
