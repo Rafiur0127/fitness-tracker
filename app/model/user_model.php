@@ -5,10 +5,13 @@ function is_email_taken($pdo, $email) {
   return $stmt->fetchColumn() ? true : false;
 }
 
-function register_user($pdo, $name, $email, $password, $age, $weight, $gender) {
+function register_user($pdo, $name, $email, $password, $age, $gender) {
   $hash = password_hash($password, PASSWORD_DEFAULT);
-  $stmt = $pdo->prepare("INSERT INTO users (name, email, password, age, weight, gender) VALUES (?, ?, ?, ?, ?, ?)");
-  return $stmt->execute([$name, $email, $hash, $age, $weight, $gender]);
+  $name_parts = preg_split('/\s+/', trim($name), 2);
+  $first_name = $name_parts[0] ?? '';
+  $last_name = $name_parts[1] ?? null;
+  $stmt = $pdo->prepare("INSERT INTO users (first_name, last_name, email, password, age, gender) VALUES (?, ?, ?, ?, ?, ?)");
+  return $stmt->execute([$first_name, $last_name, $email, $hash, $age, $gender]);
 }
 
 function login_user($pdo, $email) {
