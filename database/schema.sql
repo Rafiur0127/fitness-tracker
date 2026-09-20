@@ -86,7 +86,7 @@ CREATE TABLE `food_diary` (
   `carbs` int(11) DEFAULT 0,
   `protein` int(11) DEFAULT 0,
   `fat` int(11) DEFAULT 0,
-  `date` date DEFAULT curdate()
+  `date` date DEFAULT (CURDATE())
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
