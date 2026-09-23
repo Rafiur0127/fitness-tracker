@@ -24,9 +24,6 @@
         <h1 id="greeting">Dashboard</h1>
         <div id="sub" style="color:#666;">Loading...</div>
       </div>
-      <div>
-        <a href="login.php" id="logoutLink">Logout</a>
-      </div>
     </div>
 
     <div class="stats" id="statsRow">
@@ -57,13 +54,14 @@
     </div>
   </div>
 
+<script src="./assets/app-shell.js"></script>
 <script>
 async function loadDashboard() {
   try {
     const resp = await fetch('./api/dashboard.php', { method: 'GET', credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
 
     if (resp.status === 401) {
-      window.location.href = './login.php';
+      window.location.href = './login.php?next=' + encodeURIComponent('dashboard.php');
       return;
     }
 

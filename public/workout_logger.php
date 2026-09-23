@@ -36,6 +36,7 @@
     <tbody id="workouts"></tbody>
   </table>
 </div>
+<script src="./assets/app-shell.js"></script>
 <script>
 const form = document.getElementById('workoutForm');
 const type = document.getElementById('type');
@@ -77,7 +78,7 @@ function renderWorkouts(items) {
 }
 async function loadWorkouts() {
   const response = await fetch('./api/workouts.php', { credentials: 'same-origin' });
-  if (response.status === 401) { window.location.href = './login.php'; return; }
+  if (response.status === 401) { window.location.href = './login.php?next=' + encodeURIComponent('workout_logger.php'); return; }
   const result = await response.json();
   if (!response.ok || !result.success) throw new Error(result.message);
   renderWorkouts(result.data.workouts);

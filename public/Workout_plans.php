@@ -38,6 +38,7 @@
     <tbody id="schedule"></tbody>
   </table>
 </div>
+<script src="./assets/app-shell.js"></script>
 <script>
 let csrfToken = '';
 let plans = [];
@@ -103,7 +104,7 @@ function render(data) {
 }
 async function load() {
   const response = await fetch('./api/plans.php', { credentials: 'same-origin' });
-  if (response.status === 401) { window.location.href = './login.php'; return; }
+  if (response.status === 401) { window.location.href = './login.php?next=' + encodeURIComponent('Workout_plans.php'); return; }
   const result = await response.json();
   if (!response.ok || !result.success) throw new Error(result.message);
   render(result.data);

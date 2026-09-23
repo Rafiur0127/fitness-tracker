@@ -23,6 +23,7 @@
     <p id="total"><strong>Total today:</strong> Loading...</p>
     <p id="message"></p>
   </div>
+  <script src="./assets/app-shell.js"></script>
 <script>
 const form = document.getElementById('waterForm');
 const total = document.getElementById('total');
@@ -38,7 +39,7 @@ async function getCsrfToken() {
 }
 async function loadWater() {
   const response = await fetch('./api/water.php', { credentials: 'same-origin' });
-  if (response.status === 401) { window.location.href = './login.php'; return; }
+  if (response.status === 401) { window.location.href = './login.php?next=' + encodeURIComponent('watertracker.php'); return; }
   const result = await response.json();
   if (!response.ok || !result.success) throw new Error(result.message);
   total.textContent = `Total today: ${result.data.today_ml} ml`;

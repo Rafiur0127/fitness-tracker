@@ -122,4 +122,24 @@ if ($action === 'signup') {
     ], 201, 'Account created successfully.');
 }
 
+if ($action === 'logout') {
+    $_SESSION = [];
+
+    if (ini_get('session.use_cookies')) {
+        $params = session_get_cookie_params();
+        setcookie(
+            session_name(),
+            '',
+            time() - 42000,
+            $params['path'],
+            $params['domain'],
+            (bool) $params['secure'],
+            (bool) $params['httponly']
+        );
+    }
+
+    session_destroy();
+    sendJson(null, 200, 'Logout successful.');
+}
+
 sendJson(null, 400, 'Unsupported action.');

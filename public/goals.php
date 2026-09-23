@@ -30,6 +30,7 @@
     <tbody id="goals"></tbody>
   </table>
 </div>
+<script src="./assets/app-shell.js"></script>
 <script>
 const goalForm = document.getElementById('goalForm');
 const message = document.getElementById('message');
@@ -70,7 +71,7 @@ function renderGoals(items) {
 }
 async function loadGoals() {
   const response = await fetch('./api/goals.php', { credentials: 'same-origin' });
-  if (response.status === 401) { window.location.href = './login.php'; return; }
+  if (response.status === 401) { window.location.href = './login.php?next=' + encodeURIComponent('goals.php'); return; }
   const result = await response.json();
   if (!response.ok || !result.success) throw new Error(result.message);
   renderGoals(result.data.goals);

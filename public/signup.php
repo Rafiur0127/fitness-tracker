@@ -192,7 +192,11 @@
         showMessage(result.message || 'Account created successfully.', 'success');
         signupForm.reset();
         setTimeout(() => {
-          window.location.href = './login.php';
+          const requestedPage = new URLSearchParams(window.location.search).get('next');
+          const destination = requestedPage
+            ? './login.php?next=' + encodeURIComponent(requestedPage)
+            : './login.php';
+          window.location.href = destination;
         }, 1200);
       } catch (error) {
         showMessage('Network error. Please try again.', 'error');
