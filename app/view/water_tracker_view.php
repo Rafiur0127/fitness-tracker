@@ -13,6 +13,7 @@
     <div class="tracker">
         <h2>Water Intake Tracker</h2>
         <form method="post">
+            <?php csrf_field(); ?>
             <label>Water Drank (ml): </label>
             <input type="number" name="amount_ml" required min="50" max="2000" step="50">
             <br>
