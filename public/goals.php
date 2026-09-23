@@ -1,2 +1,111 @@
-<?php
-require_once '../app/controller/goals_controller.php';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goals</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f4c3; padding: 40px; }
+    .container { max-width: 760px; margin: auto; background: white; padding: 30px; border-radius: 10px; }
+    input, button { padding: 8px; width: 100%; margin-top: 8px; box-sizing: border-box; }
+    table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+    th, td { padding: 8px; border: 1px solid #ccc; text-align: center; }
+    .completed { background: #dcedc8; }
+    #message { padding: 10px; margin-bottom: 15px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>Set a Goal</h2>
+  <div id="message"></div>
+  <form id="goalForm">
+    <input id="title" type="text" placeholder="Goal title" required>
+    <input id="target" type="number" placeholder="Target value" min="1" required>
+    <input id="unit" type="text" placeholder="Unit (optional)" maxlength="50">
+    <button type="submit">Add Goal</button>
+  </form>
+  <h3>Your Goals</h3>
+  <table>
+    <thead><tr><th>Title</th><th>Progress</th><th>Target</th><th>Status</th><th>Update</th></tr></thead>
+    <tbody id="goals"></tbody>
+  </table>
+</div>
+<script>
+const goalForm = document.getElementById('goalForm');
+const message = document.getElementById('message');
+let csrfToken = '';
+async function getCsrfToken() {
+  if (csrfToken) return csrfToken;
+  const response = await fetch('./api/auth.php', { credentials: 'same-origin' });
+  const result = await response.json();
+  if (!response.ok || !result.success) throw new Error(result.message || 'Unable to initialize security token.');
+  csrfToken = result.data.csrf_token;
+  return csrfToken;
+}
+function showMessage(text, error = false) {
+  message.textContent = text;
+  message.style.background = error ? '#ffe6e6' : '#e8f5e9';
+}
+function renderGoals(items) {
+  const tbody = document.getElementById('goals');
+  tbody.innerHTML = '';
+  if (!items.length) { tbody.innerHTML = '<tr><td colspan="5">No goals yet.</td></tr>'; return; }
+  items.forEach((goal) => {
+    const row = document.createElement('tr');
+    if (goal.status === 'completed') row.className = 'completed';
+    [goal.title, `${goal.current_value} ${goal.unit || ''}`, `${goal.target_value} ${goal.unit || ''}`,
+      goal.status === 'completed' ? 'Completed' : 'Ongoing'].forEach((value) => {
+        const cell = document.createElement('td'); cell.textContent = value; row.appendChild(cell);
+      });
+    const action = document.createElement('td');
+    if (goal.status === 'ongoing') {
+      const input = document.createElement('input');
+      input.type = 'number'; input.min = '1'; input.placeholder = '+Progress';
+      const button = document.createElement('button'); button.textContent = 'Add';
+      button.addEventListener('click', () => updateProgress(goal.id, input.value));
+      action.appendChild(input); action.appendChild(button);
+    } else { action.textContent = 'Done'; }
+    row.appendChild(action); tbody.appendChild(row);
+  });
+}
+async function loadGoals() {
+  const response = await fetch('./api/goals.php', { credentials: 'same-origin' });
+  if (response.status === 401) { window.location.href = './login.php'; return; }
+  const result = await response.json();
+  if (!response.ok || !result.success) throw new Error(result.message);
+  renderGoals(result.data.goals);
+}
+async function updateProgress(goalId, progress) {
+  try {
+    const response = await fetch('./api/goals.php', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-Token': await getCsrfToken() },
+      body: JSON.stringify({ action: 'progress', goal_id: Number(goalId), progress: Number(progress) })
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success) throw new Error(result.message);
+    showMessage(result.message); await loadGoals();
+  } catch (error) { showMessage(error.message || 'Unable to update goal.', true); }
+}
+goalForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  try {
+    const response = await fetch('./api/goals.php', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-Token': await getCsrfToken() },
+      body: JSON.stringify({
+        action: 'add',
+        title: document.getElementById('title').value.trim(),
+        target_value: Number(document.getElementById('target').value),
+        unit: document.getElementById('unit').value.trim()
+      })
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success) throw new Error(result.message);
+    showMessage(result.message); goalForm.reset(); await loadGoals();
+  } catch (error) { showMessage(error.message || 'Unable to add goal.', true); }
+});
+loadGoals().catch((error) => showMessage(error.message || 'Unable to load goals.', true));
+</script>
+</body>
+</html>

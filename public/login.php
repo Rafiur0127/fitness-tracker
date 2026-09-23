@@ -108,10 +108,23 @@
   <script>
     const loginForm = document.getElementById('loginForm');
     const messageBox = document.getElementById('message');
+    let csrfToken = '';
 
     function showMessage(text, type) {
       messageBox.textContent = text;
       messageBox.className = `message ${type}`;
+    }
+
+    async function getCsrfToken() {
+      if (csrfToken) return csrfToken;
+      const response = await fetch('./api/auth.php', {
+        credentials: 'same-origin',
+        headers: { 'Accept': 'application/json' }
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.message || 'Unable to initialize security token.');
+      csrfToken = result.data.csrf_token;
+      return csrfToken;
     }
 
     loginForm.addEventListener('submit', async (event) => {
@@ -125,11 +138,13 @@
       };
 
       try {
+        const token = await getCsrfToken();
         const response = await fetch('./api/auth.php', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'X-CSRF-Token': token
           },
           body: JSON.stringify(payload)
         });
@@ -151,4 +166,3 @@
   </script>
 </body>
 </html>
-
