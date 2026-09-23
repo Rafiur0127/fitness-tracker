@@ -38,7 +38,8 @@ fitness_tracker/
 │   ├── model/              # Database queries (PDO, prepared statements)
 │   ├── controller/         # Business logic & input validation
 │   └── view/               # HTML templates (PHP views)
-├── public/                 # Entry-point PHP files (URL endpoints)
+├── frontend/               # Static browser UI (HTML, CSS, and shared JavaScript)
+├── public/                 # Compatibility pages and PHP API endpoints
 ├── .env.example            # Environment variable template
 └── .gitignore
 ```
@@ -50,7 +51,7 @@ fitness_tracker/
 ### Prerequisites
 - PHP 8.1+
 - MySQL 8+
-- A local server (XAMPP, Laragon, or PHP built-in server)
+- A local server (XAMPP, Laragon, or Apache configured like the included vhost)
 - Docker Desktop with Docker Compose (recommended)
 
 ### Installation
@@ -66,12 +67,12 @@ cp .env.example .env
 
 # 3. Import the database schema
 mysql -u your_user -p fitness_tracker1 < database/schema.sql
-
-# 4. Start your local server
-php -S localhost:8000 -t public/
 ```
 
-Then visit `http://localhost:8000/login.php`.
+Configure Apache's document root as `frontend/`, add an `/api/` alias to
+`public/api/` (the provided `docker/apache-vhost.conf` does this), and visit
+`http://localhost:8000/login.html`. The legacy `/login.php` URL redirects to
+the static page when that vhost is used.
 
 ### Run with Docker Compose
 
@@ -82,7 +83,8 @@ service-to-service database host:
 docker compose up --build
 ```
 
-- Application: `http://localhost:8080/login.php`
+- Application: `http://localhost:8080/login.html`
+- API base: `http://localhost:8080/api/` (the existing PHP API URLs are unchanged)
 - phpMyAdmin: `http://localhost:8081`
 
 The database is persisted in the `db_data` volume. To recreate it from
