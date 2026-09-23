@@ -63,4 +63,32 @@ function requireLogin(): int
     return (int) $userId;
 }
 
+function getApiCsrfToken(): string
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+
+    return (string) $_SESSION['csrf_token'];
+}
+
+/**
+ * Reject state-changing requests without the session's CSRF token.
+ *
+ * @param array<string, mixed> $payload
+ */
+function requireCsrf(array $payload = []): void
+{
+    $provided = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $payload['csrf_token'] ?? '';
+    $expected = getApiCsrfToken();
+
+    if (!is_string($provided) || !hash_equals($expected, $provided)) {
+        sendJson(null, 403, 'Invalid CSRF token.');
+    }
+}
+
 handleCorsPreflight();

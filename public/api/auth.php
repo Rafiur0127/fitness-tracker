@@ -5,6 +5,10 @@ declare(strict_types=1);
 require_once __DIR__ . '/helpers.php';
 require_once __DIR__ . '/../../config/config.php';
 
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    sendJson(['csrf_token' => getApiCsrfToken()], 200, 'CSRF token retrieved.');
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     sendJson(null, 405, 'Method not allowed.');
 }
@@ -14,6 +18,8 @@ $payload = !empty($rawInput) ? json_decode($rawInput, true) : [];
 if (!is_array($payload)) {
     $payload = [];
 }
+
+requireCsrf($payload);
 
 $action = $_POST['action'] ?? $payload['action'] ?? null;
 $action = is_string($action) ? trim($action) : null;

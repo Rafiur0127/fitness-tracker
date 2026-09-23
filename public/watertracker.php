@@ -27,6 +27,15 @@
 const form = document.getElementById('waterForm');
 const total = document.getElementById('total');
 const message = document.getElementById('message');
+let csrfToken = '';
+async function getCsrfToken() {
+  if (csrfToken) return csrfToken;
+  const response = await fetch('./api/auth.php', { credentials: 'same-origin' });
+  const result = await response.json();
+  if (!response.ok || !result.success) throw new Error(result.message || 'Unable to initialize security token.');
+  csrfToken = result.data.csrf_token;
+  return csrfToken;
+}
 async function loadWater() {
   const response = await fetch('./api/water.php', { credentials: 'same-origin' });
   if (response.status === 401) { window.location.href = './login.php'; return; }
@@ -40,7 +49,7 @@ form.addEventListener('submit', async (event) => {
     const response = await fetch('./api/water.php', {
       method: 'POST',
       credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-Token': await getCsrfToken() },
       body: JSON.stringify({ amount_ml: Number(document.getElementById('amount').value) })
     });
     const result = await response.json();

@@ -37,6 +37,15 @@
 <script>
 const nutritionForm = document.getElementById('nutritionForm');
 const message = document.getElementById('message');
+let csrfToken = '';
+async function getCsrfToken() {
+  if (csrfToken) return csrfToken;
+  const response = await fetch('./api/auth.php', { credentials: 'same-origin' });
+  const result = await response.json();
+  if (!response.ok || !result.success) throw new Error(result.message || 'Unable to initialize security token.');
+  csrfToken = result.data.csrf_token;
+  return csrfToken;
+}
 function showMessage(text, error = false) {
   message.textContent = text; message.style.background = error ? '#ffe6e6' : '#e8f5e9';
 }
@@ -62,7 +71,7 @@ nutritionForm.addEventListener('submit', async (event) => {
   try {
     const response = await fetch('./api/nutrition.php', {
       method: 'POST', credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-Token': await getCsrfToken() },
       body: JSON.stringify({
         meal_name: document.getElementById('mealName').value.trim(),
         calories: Number(document.getElementById('calories').value),

@@ -31,6 +31,8 @@ try {
         sendJson(null, 400, 'Invalid JSON request body.');
     }
 
+    requireCsrf($input);
+
     $mealName = trim((string) ($input['meal_name'] ?? ''));
     $calories = filter_var($input['calories'] ?? null, FILTER_VALIDATE_INT);
     $protein = filter_var($input['protein'] ?? 0, FILTER_VALIDATE_FLOAT);

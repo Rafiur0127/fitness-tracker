@@ -33,6 +33,15 @@
 <script>
 const goalForm = document.getElementById('goalForm');
 const message = document.getElementById('message');
+let csrfToken = '';
+async function getCsrfToken() {
+  if (csrfToken) return csrfToken;
+  const response = await fetch('./api/auth.php', { credentials: 'same-origin' });
+  const result = await response.json();
+  if (!response.ok || !result.success) throw new Error(result.message || 'Unable to initialize security token.');
+  csrfToken = result.data.csrf_token;
+  return csrfToken;
+}
 function showMessage(text, error = false) {
   message.textContent = text;
   message.style.background = error ? '#ffe6e6' : '#e8f5e9';
@@ -70,7 +79,7 @@ async function updateProgress(goalId, progress) {
   try {
     const response = await fetch('./api/goals.php', {
       method: 'POST', credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-Token': await getCsrfToken() },
       body: JSON.stringify({ action: 'progress', goal_id: Number(goalId), progress: Number(progress) })
     });
     const result = await response.json();
@@ -83,7 +92,7 @@ goalForm.addEventListener('submit', async (event) => {
   try {
     const response = await fetch('./api/goals.php', {
       method: 'POST', credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-Token': await getCsrfToken() },
       body: JSON.stringify({
         action: 'add',
         title: document.getElementById('title').value.trim(),

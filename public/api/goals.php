@@ -29,6 +29,8 @@ try {
         sendJson(null, 400, 'Invalid JSON request body.');
     }
 
+    requireCsrf($input);
+
     $action = (string) ($input['action'] ?? '');
 
     if ($action === 'add') {

@@ -28,6 +28,8 @@ try {
         sendJson(null, 400, 'Invalid JSON request body.');
     }
 
+    requireCsrf($input);
+
     $amount = filter_var($input['amount_ml'] ?? null, FILTER_VALIDATE_INT);
     if ($amount === false || $amount < 1 || $amount > 10000) {
         sendJson(null, 400, 'Water amount must be between 1 and 10000 ml.');

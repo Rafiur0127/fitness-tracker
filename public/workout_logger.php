@@ -41,6 +41,15 @@ const form = document.getElementById('workoutForm');
 const type = document.getElementById('type');
 const customType = document.getElementById('customType');
 const message = document.getElementById('message');
+let csrfToken = '';
+async function getCsrfToken() {
+  if (csrfToken) return csrfToken;
+  const response = await fetch('./api/auth.php', { credentials: 'same-origin' });
+  const result = await response.json();
+  if (!response.ok || !result.success) throw new Error(result.message || 'Unable to initialize security token.');
+  csrfToken = result.data.csrf_token;
+  return csrfToken;
+}
 type.addEventListener('change', () => {
   customType.hidden = type.value !== 'custom';
   customType.required = type.value === 'custom';
@@ -80,7 +89,7 @@ form.addEventListener('submit', async (event) => {
     const response = await fetch('./api/workouts.php', {
       method: 'POST',
       credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-Token': await getCsrfToken() },
       body: JSON.stringify({ type: workoutType, duration: Number(document.getElementById('duration').value) })
     });
     const result = await response.json();

@@ -33,6 +33,8 @@ try {
         sendJson(null, 400, 'Invalid JSON request body.');
     }
 
+    requireCsrf($input);
+
     $type = trim((string) ($input['type'] ?? ''));
     $duration = filter_var($input['duration'] ?? null, FILTER_VALIDATE_INT);
 
