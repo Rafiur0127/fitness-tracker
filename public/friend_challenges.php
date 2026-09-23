@@ -1,13 +1,101 @@
-<?php
-session_start();
-require_once '../config/config.php';
-require_once '../app/controller/challenge_controller.php';
-
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Friend Challenges</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5faff; padding: 30px; }
+    .container { max-width: 900px; margin: auto; background: #fff; padding: 25px; border-radius: 10px; }
+    input, textarea, button { width: 100%; padding: 9px; margin: 6px 0; box-sizing: border-box; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    #message { padding: 8px; margin: 8px 0; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>Friend Challenge Board</h2>
+  <div id="message"></div>
+  <form id="challengeForm">
+    <input id="title" placeholder="Challenge title" required>
+    <textarea id="description" placeholder="Challenge description" required></textarea>
+    <input id="target" type="number" min="1" placeholder="Target steps" required>
+    <input id="start" type="date" required>
+    <input id="end" type="date" required>
+    <button type="submit">Create Challenge</button>
+  </form>
+  <table>
+    <thead><tr><th>Title</th><th>Target</th><th>Dates</th><th>Status</th></tr></thead>
+    <tbody id="challenges"></tbody>
+  </table>
+</div>
+<script>
+let csrfToken = '';
+const message = document.getElementById('message');
+async function getCsrfToken() {
+  if (csrfToken) return csrfToken;
+  const response = await fetch('./api/auth.php', { credentials: 'same-origin' });
+  const result = await response.json();
+  if (!response.ok || !result.success) throw new Error(result.message);
+  csrfToken = result.data.csrf_token;
+  return csrfToken;
 }
-
-$user_id = $_SESSION['user_id'];
-$data = handle_challenges($pdo, $user_id);
-include '../app/view/challenge_view.php';
+function showMessage(text, error = false) {
+  message.textContent = text; message.style.background = error ? '#ffe6e6' : '#e8f5e9';
+}
+function render(items) {
+  const tbody = document.getElementById('challenges'); tbody.innerHTML = '';
+  if (!items.length) { tbody.innerHTML = '<tr><td colspan="4">No challenges yet.</td></tr>'; return; }
+  items.forEach((item) => {
+    const row = document.createElement('tr');
+    [item.title, `${item.target_steps} steps`, `${item.start_date} to ${item.end_date}`]
+      .forEach((value) => { const cell = document.createElement('td'); cell.textContent = value; row.appendChild(cell); });
+    const status = document.createElement('td');
+    if (Number(item.joined) === 1) status.textContent = 'Joined';
+    else {
+      const button = document.createElement('button'); button.textContent = 'Join';
+      button.addEventListener('click', async () => {
+        try { await mutate({ action: 'join', challenge_id: Number(item.id) }); await load(); }
+        catch (error) { showMessage(error.message, true); }
+      });
+      status.appendChild(button);
+    }
+    row.appendChild(status); tbody.appendChild(row);
+  });
+}
+async function mutate(body) {
+  const response = await fetch('./api/challenges.php', {
+    method: 'POST', credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-Token': await getCsrfToken() },
+    body: JSON.stringify(body)
+  });
+  const result = await response.json();
+  if (!response.ok || !result.success) throw new Error(result.message);
+  return result;
+}
+async function load() {
+  const response = await fetch('./api/challenges.php', { credentials: 'same-origin' });
+  if (response.status === 401) { window.location.href = './login.php'; return; }
+  const result = await response.json();
+  if (!response.ok || !result.success) throw new Error(result.message);
+  render(result.data.challenges);
+}
+document.getElementById('challengeForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  try {
+    await mutate({
+      action: 'create',
+      title: document.getElementById('title').value.trim(),
+      description: document.getElementById('description').value.trim(),
+      target_steps: Number(document.getElementById('target').value),
+      start_date: document.getElementById('start').value,
+      end_date: document.getElementById('end').value
+    });
+    showMessage('Challenge created.'); event.target.reset(); await load();
+  } catch (error) { showMessage(error.message, true); }
+});
+load().catch((error) => showMessage(error.message || 'Unable to load challenges.', true));
+</script>
+</body>
+</html>
