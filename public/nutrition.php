@@ -34,6 +34,7 @@
     <tbody id="logs"></tbody>
   </table>
 </div>
+<script src="./assets/app-shell.js"></script>
 <script>
 const nutritionForm = document.getElementById('nutritionForm');
 const message = document.getElementById('message');
@@ -61,7 +62,7 @@ function renderLogs(items) {
 }
 async function loadNutrition() {
   const response = await fetch('./api/nutrition.php', { credentials: 'same-origin' });
-  if (response.status === 401) { window.location.href = './login.php'; return; }
+  if (response.status === 401) { window.location.href = './login.php?next=' + encodeURIComponent('nutrition.php'); return; }
   const result = await response.json();
   if (!response.ok || !result.success) throw new Error(result.message);
   renderLogs(result.data.logs);

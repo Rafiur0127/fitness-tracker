@@ -30,6 +30,7 @@
     <tbody id="challenges"></tbody>
   </table>
 </div>
+<script src="./assets/app-shell.js"></script>
 <script>
 let csrfToken = '';
 const message = document.getElementById('message');
@@ -76,7 +77,7 @@ async function mutate(body) {
 }
 async function load() {
   const response = await fetch('./api/challenges.php', { credentials: 'same-origin' });
-  if (response.status === 401) { window.location.href = './login.php'; return; }
+  if (response.status === 401) { window.location.href = './login.php?next=' + encodeURIComponent('friend_challenges.php'); return; }
   const result = await response.json();
   if (!response.ok || !result.success) throw new Error(result.message);
   render(result.data.challenges);

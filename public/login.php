@@ -101,14 +101,19 @@
     </form>
 
     <p class="meta">
-      Don't have an account? <a href="signup.php">Sign up</a>
+      Don't have an account? <a href="signup.php" id="signupLink">Sign up</a>
     </p>
   </div>
 
   <script>
     const loginForm = document.getElementById('loginForm');
     const messageBox = document.getElementById('message');
+    const requestedPage = new URLSearchParams(window.location.search).get('next');
     let csrfToken = '';
+
+    if (requestedPage) {
+      document.getElementById('signupLink').href = './signup.php?next=' + encodeURIComponent(requestedPage);
+    }
 
     function showMessage(text, type) {
       messageBox.textContent = text;
@@ -158,7 +163,17 @@
         }
 
         showMessage(result.message || 'Login successful.', 'success');
-        window.location.href = './dashboard.php';
+        const allowedPages = new Set([
+          'dashboard.php',
+          'workout_logger.php',
+          'watertracker.php',
+          'goals.php',
+          'nutrition.php',
+          'Workout_plans.php',
+          'friend_challenges.php'
+        ]);
+        const destination = allowedPages.has(requestedPage) ? requestedPage : 'dashboard.php';
+        window.location.href = './' + destination;
       } catch (error) {
         showMessage('Network error. Please try again.', 'error');
       }
