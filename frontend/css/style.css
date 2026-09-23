@@ -1,0 +1,3 @@
+body { color:#243447; }
+button { cursor:pointer; }
+button:disabled { cursor:wait; opacity:.7; }
