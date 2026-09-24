@@ -1,5 +1,6 @@
 RewriteEngine On
 
 # Keep existing bookmarked PHP page URLs working while the browser UI is static.
-RewriteRule ^(login|signup|dashboard|workout_logger|watertracker|goals|nutrition|Workout_plans|friend_challenges)\.php$ /$1.html [R=302,L]
+RewriteRule ^Workout_plans\.php$ /workout_plans.html [R=302,L,NC]
+RewriteRule ^(login|signup|dashboard|workout_logger|watertracker|goals|nutrition|friend_challenges)\.php$ /$1.html [R=302,L,NC]
 RewriteRule ^$ /login.html [L]
