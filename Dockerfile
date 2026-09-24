@@ -10,7 +10,6 @@ RUN a2enmod rewrite
 COPY docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
 
 WORKDIR /var/www/html
-COPY app ./app
 COPY config ./config
 COPY public ./public
 COPY database ./database

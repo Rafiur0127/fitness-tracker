@@ -1,6 +1,6 @@
 # 🏋️ Fitness Tracker
 
-A full-stack PHP web application for tracking workouts, water intake, fitness goals, and community challenges. Built with a clean MVC architecture, PDO/MySQL, and session-based authentication.
+A full-stack PHP web application for tracking workouts, water intake, fitness goals, and community challenges. The backend is a JSON REST API and the frontend is a decoupled Vanilla JavaScript client using PDO/MySQL and session-based authentication.
 
 ---
 
@@ -24,7 +24,7 @@ A full-stack PHP web application for tracking workouts, water intake, fitness go
 | Database   | MySQL 8 via PDO (prepared statements) |
 | Frontend   | HTML5, CSS3, vanilla JS           |
 | Auth       | PHP Sessions + `password_hash`    |
-| Pattern    | MVC (Model / View / Controller)   |
+| Pattern    | REST API + static frontend         |
 
 ---
 
@@ -33,13 +33,10 @@ A full-stack PHP web application for tracking workouts, water intake, fitness go
 ```
 fitness_tracker/
 ├── config/
-│   └── config.php          # DB connection, CSRF helpers (reads from .env)
-├── app/
-│   ├── model/              # Database queries (PDO, prepared statements)
-│   ├── controller/         # Business logic & input validation
-│   └── view/               # HTML templates (PHP views)
+│   └── config.php          # DB connection and session bootstrap
 ├── frontend/               # Static browser UI (HTML, CSS, and shared JavaScript)
-├── public/                 # Compatibility pages and PHP API endpoints
+├── public/
+│   └── api/                # JSON-only PHP REST endpoints
 ├── .env.example            # Environment variable template
 └── .gitignore
 ```
@@ -71,8 +68,7 @@ mysql -u your_user -p fitness_tracker1 < database/schema.sql
 
 Configure Apache's document root as `frontend/`, add an `/api/` alias to
 `public/api/` (the provided `docker/apache-vhost.conf` does this), and visit
-`http://localhost:8000/login.html`. The legacy `/login.php` URL redirects to
-the static page when that vhost is used.
+`http://localhost:8080/login.html`.
 
 ### Run with Docker Compose
 
